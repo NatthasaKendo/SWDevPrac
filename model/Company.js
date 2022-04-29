@@ -26,7 +26,7 @@ const CompanySchema = new mongoose.Schema(
       required: [true, "Please add a telephone number"],
       match: [
         /[0-9]{3}-[0-9]{3}-[0-9]{4}$/,
-        "Please add a valid telephone number (format: 000-0000000)",
+        "Please add a valid telephone number (format: 000-000-0000)",
       ],
     },
   },
@@ -45,10 +45,10 @@ CompanySchema.virtual("InterviewSession", {
 });
 
 //* Cascade delete InterviewSession when a hospital is deleted
-CompanySchema.pre("remove", async function (next) {
-  console.log(`InterviewSession being removed from company ${this._id}`);
-  await this.model("InterviewSession").deleteMany({ company: this._id });
-  next();
-});
+// CompanySchema.pre("remove", async function (next) {
+//   console.log(`InterviewSession being removed from company ${this._id}`);
+//   await this.model("InterviewSession").deleteMany({ company: this._id });
+//   next();
+// });
 
 module.exports = mongoose.model("company", CompanySchema);
