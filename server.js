@@ -12,7 +12,7 @@ const hpp = require("hpp");
 const app = express();
 
 //* Routes file
-// const interview_session = require("./routes/interview_session");
+const interview_session = require("./routes/interview_session");
 const companies = require("./routes/companies");
 const auth = require("./routes/auth");
 
@@ -46,7 +46,7 @@ app.use(cors());
 
 app.use("/api/v1/auth", auth);
 app.use("/api/v1/companies", companies);
-// app.use("/api/v1/sessions", interview_session);
+app.use("/api/v1/sessions", interview_session);
 
 const PORT = process.env.PORT || 5000;
 const server = app.listen(

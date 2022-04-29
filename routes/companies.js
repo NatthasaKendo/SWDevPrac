@@ -3,16 +3,16 @@ const router = express.Router();
 const { protect, authorize } = require("../middleware/auth");
 
 const {
+  createCompany,
   getCompanies,
   getCompany,
-  createCompany,
   updateCompany,
   deleteCompany,
 } = require("../controller/company");
 
 //Re-route into other resource routers
-// const sessionRouter = require("./interview_session");
-// router.use("/:companyId/sessions", sessionRouter);
+const sessionRouter = require("./interview_session");
+router.use("/:companyId/sessions", sessionRouter);
 
 router
   .route("/")

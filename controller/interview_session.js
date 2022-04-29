@@ -1,196 +1,206 @@
-const InterviewSession = require('../models/Interview_session');
+const InterviewSession = require("../model/Interview_session");
 
-const Company = require('../models/Company');
+const Company = require("../model/Company");
 
 //@desc     "Add a new appointment"
 //@route    POST /api/v1/hospital/:hospitalId/appointment
 //@access   Private
-
 exports.addInterviewSession = async (req, res, next) => {
-    try {
-        //* add user id to the request body
-        req.body.user = req.user.id;
-        // console.log(req.user.name);
-        //* check for existed appointment
-        const existedInterviewSession = await InterviewSession.find({
-            user: req.user.id,
-        });
+  try {
+    //* add user id to the request body
+    req.body.user = req.user.id;
+    // console.log(req.user.name);
+    //* check for existed appointment
+    const existedInterviewSession = await InterviewSession.find({
+      user: req.user.id,
+    });
 
-        //* if user is not an admin, they can only create 3 appointments
-        if (existedInterviewSession.length >= 3 && req.user.role !== 'admin') {
-            return res.status(400).json({
-                success: false,
-                error: `The user with ID ${req.user.id} has already created 3 appointments.`
-            });
-        }
-        //TODO change req.body.hospital = req.params.hospitalId;
-
-        const company = await Company.findById(req.params.companyId);
-
-        if (!company) {
-            return res.status(400).json({
-                success: false,
-                message: `No hospital with the id ${req.params.companyId}`
-            });
-        }
-
-        const interviewSession = await InterviewSession.create(req.body);
-
-        res.status(200).json({
-            success: true,
-            data: interviewSession
-        });
-        
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            message: 'Cannot create an interview session'
-        });
+    //* if user is not an admin, they can only create 3 appointments
+    if (existedInterviewSession.length >= 3 && req.user.role !== "admin") {
+      return res.status(400).json({
+        success: false,
+        error: `The user with ID ${req.user.id} has already created 3 interview sessions.`,
+      });
     }
+
+    const company = await Company.findById(req.body.company);
+
+    if (!company) {
+      return res.status(400).json({
+        success: false,
+        message: `No company with the id ${req.body.company}`,
+      });
+    }
+
+    const interviewSession = await InterviewSession.create(req.body);
+
+    res.status(200).json({
+      success: true,
+      data: interviewSession,
+    });
+  } catch (error) {
+    // console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Cannot create an interview session",
+    });
+  }
 };
-    
+
 exports.getInterviewSession = async (req, res, next) => {
-    try {
-        const interviewSession = await InterviewSession.findById(req.params.id).populate({
-            path: 'hospital',
-            select: 'name description tel',
-        });
+  try {
+    const interviewSession = await InterviewSession.findById(
+      req.params.id
+    ).populate({
+      path: "company",
+      select: "name address description telephoneNumber",
+    });
 
-        if (!appointment) {
-            return res.status(400).json({
-                success: false,
-                message: `No appointment with the id of ${req.params.id}`
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            data: appointment
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            message: 'Cannot find Appointment'
-        });
+    if (!interviewSession) {
+      return res.status(400).json({
+        success: false,
+        message: `No interview session with the id of ${req.params.id}`,
+      });
     }
-}
 
-exports.getAppointments=async (req,res,next)=>{
-    let query;
+    res.status(200).json({
+      success: true,
+      data: interviewSession,
+    });
+  } catch (error) {
+    // console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Cannot find the interview session",
+    });
+  }
+};
 
-     //* General users can see only their appointments!
-    if(req.user.role !== 'admin'){ 
-        query = Appointment.find({user:req.user.id}).populate({
-            path:'hospital',
-            select: 'name province tel'
-        });
-    }else{ //* If you are an admin, you can see all!
-        if(req.params.hospitalId){
-            query = Appointment.find({hospital:req.params.hospitalId}).populate({
-                path:'hospital',
-                select: 'name province tel'
-            });
-        } else {
-            query = Appointment.find().populate({
-                path:'hospital',
-                select: 'name province tel'
-            });
-        }
+exports.getInterviewSessions = async (req, res, next) => {
+  let query;
 
+  //* General users can see only their appointments!
+  if (req.user.role !== "admin") {
+    query = InterviewSession.find({ user: req.user.id }).populate({
+      path: "company",
+      select: "name address description telephoneNumber",
+    });
+  } else {
+    //* If you are an admin, you can see all!
+    if (req.params.companyId) {
+      query = InterviewSession.find({
+        company: req.params.companyId,
+      }).populate({
+        path: "company",
+        select: "name address description telephoneNumber",
+      });
+    } else {
+      query = InterviewSession.find().populate({
+        path: "company",
+        select: "name address description telephoneNumber",
+      });
     }
-    try {
-        const appointments = await query;
-        res.status(200).json({
-            success: true,
-            count: appointments.length,
-            data: appointments
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Cannot find Appointment"
-        });
-    }
+  }
+  try {
+    const sessions = await query;
+    res.status(200).json({
+      success: true,
+      count: sessions.length,
+      data: sessions,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Cannot find the interview session",
+    });
+  }
 };
 
 //@desc     "Update an appointment"
 //@route    PUT /api/v1/appointment/:id
 //@access   Private
 
-exports.updateAppointment = async (req, res, next) => {
-    try {
-        let appointment = await Appointment.findById(req.params.id);
-        //* Make sure the user is the one who created the appointment
-        if (appointment.user.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(401).json({
-                success: false,
-                message: `User ${req.user.id} is not authorized to update this appointment`
-            });
-        }
-        
-        if (!appointment) {
-            return res.status(404).json({
-                success: false,
-                message: `No appointment with the id of ${req.params.id}`
-            });
-        }
+exports.updateInterviewSession = async (req, res, next) => {
+  try {
+    let interviewSession = await InterviewSession.findById(req.params.id);
 
-        appointment = await Appointment.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-            runValidators: true
-        }).populate({
-            path: 'hospital',
-            select: 'name description tel',
-        });
-
-        res.status(200).json({
-            success: true,
-            data: appointment
-        });
-    } catch (error) {
-        console.log(error);
-        res.status(500).json({
-            success: false,
-            message: "Cannot update Appointment"
-        });
+    if (
+      interviewSession.user.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: `User ${req.user.id} is not authorized to update this interview session`,
+      });
     }
+
+    if (!interviewSession) {
+      return res.status(404).json({
+        success: false,
+        message: `No an interview session with the id of ${req.params.id}`,
+      });
+    }
+
+    interviewSession = await InterviewSession.findByIdAndUpdate(
+      req.params.id,
+      { $set: { ...req.body } },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).populate({
+      path: "company",
+      select: "name address description telephoneNumber",
+    });
+
+    res.status(200).json({
+      success: true,
+      data: interviewSession,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      success: false,
+      message: "Cannot update the interview session",
+    });
+  }
 };
 
 //@desc     "Delete an appointment"
 //@route    DELETE /api/v1/appointment/:id
 //@access   Private
-
-exports.deleteAppointment = async (req, res, next) => {
-    try { 
-        const appointment = await Appointment.findById(req.params.id);
-        //* Make sure the user is the one who created the appointment
-        if (appointment.user.toString() !== req.user.id && req.user.role !== 'admin') {
-            return res.status(401).json({
-                success: false,
-                message: `User ${req.user.id} is not authorized to delete this appointment`
-            });
-        }
-        if (!appointment) {
-            return res.status(404).json({
-                success: false,
-                message: `No appointment with the id of ${req.params.id}`
-            });
-        }
-
-        await appointment.remove();
-        
-        res.status(200).json({
-            success: true,
-            message: 'Appointment deleted',
-            data: {}
-        });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success: false,
-            message: "Cannot delete Appointment"
-        });
+exports.deleteInterviewSession = async (req, res, next) => {
+  try {
+    const interviewSession = await InterviewSession.findById(req.params.id);
+    //* Make sure the user is the one who created the appointment
+    if (
+      interviewSession.user.toString() !== req.user.id &&
+      req.user.role !== "admin"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: `User ${req.user.id} is not authorized to delete this interview session`,
+      });
     }
-};  
+    if (!interviewSession) {
+      return res.status(404).json({
+        success: false,
+        message: `No interview session with the id of ${req.params.id}`,
+      });
+    }
+
+    await interviewSession.remove();
+
+    res.status(200).json({
+      success: true,
+      message: "Interview session deleted",
+      data: {},
+    });
+  } catch (error) {
+    // console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Cannot delete the interview session",
+    });
+  }
+};

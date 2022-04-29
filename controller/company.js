@@ -20,7 +20,7 @@ exports.getCompanies = async (req, res, next) => {
     /\b(gte|gt|lte|lt|in)\b/g,
     (match) => `$${match}`
   );
-  // query = Company.find(JSON.parse(queryStr)).populate("InterviewSession");
+  // query = Company.find(JSON.parse(queryStr)).populate("interviewSession");
   query = Company.find(JSON.parse(queryStr));
 
   //* Select Fields

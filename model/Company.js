@@ -40,15 +40,15 @@ const CompanySchema = new mongoose.Schema(
 CompanySchema.virtual("InterviewSession", {
   ref: "InterviewSession",
   localField: "_id",
-  foreignField: "company",
+  foreignField: "Company",
   justOne: false,
 });
 
 //* Cascade delete InterviewSession when a hospital is deleted
-// CompanySchema.pre("remove", async function (next) {
-//   console.log(`InterviewSession being removed from company ${this._id}`);
-//   await this.model("InterviewSession").deleteMany({ company: this._id });
-//   next();
-// });
+CompanySchema.pre("remove", async function (next) {
+  console.log(`InterviewSession being removed from company ${this._id}`);
+  await this.model("InterviewSession").deleteMany({ company: this._id });
+  next();
+});
 
-module.exports = mongoose.model("company", CompanySchema);
+module.exports = mongoose.model("Company", CompanySchema);
