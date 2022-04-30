@@ -2,14 +2,14 @@ const InterviewSession = require("../model/Interview_session");
 
 const Company = require("../model/Company");
 
-//@desc     "Add a new appointment"
-//@route    POST /api/v1/hospital/:hospitalId/appointment
-//@access   Private
+//@desc     add an interview session
+//@route    POST /api/v1/sessions
+//@access   private
 exports.addInterviewSession = async (req, res, next) => {
   try {
     //* add user id to the request body
     req.body.user = req.user.id;
-    // console.log(req.user.name);
+
     //* check for existed appointment
     const existedInterviewSession = await InterviewSession.find({
       user: req.user.id,
@@ -39,7 +39,6 @@ exports.addInterviewSession = async (req, res, next) => {
       data: interviewSession,
     });
   } catch (error) {
-    // console.log(error);
     return res.status(500).json({
       success: false,
       message: "Cannot create an interview session",
@@ -47,6 +46,9 @@ exports.addInterviewSession = async (req, res, next) => {
   }
 };
 
+//@desc     Get an interview session
+//@route    GET /api/v1/sessions/:id
+//@access   public
 exports.getInterviewSession = async (req, res, next) => {
   try {
     const interviewSession = await InterviewSession.findById(
@@ -68,7 +70,6 @@ exports.getInterviewSession = async (req, res, next) => {
       data: interviewSession,
     });
   } catch (error) {
-    // console.log(error);
     return res.status(500).json({
       success: false,
       message: "Cannot find the interview session",
@@ -76,6 +77,9 @@ exports.getInterviewSession = async (req, res, next) => {
   }
 };
 
+//@desc     Get all interview sessions
+//@route    GET /api/v1/appointments
+//@access   public
 exports.getInterviewSessions = async (req, res, next) => {
   let query;
 
@@ -116,10 +120,9 @@ exports.getInterviewSessions = async (req, res, next) => {
   }
 };
 
-//@desc     "Update an appointment"
-//@route    PUT /api/v1/appointment/:id
+//@desc     Update an interview session
+//@route    PUT /api/v1/sessions/:id
 //@access   Private
-
 exports.updateInterviewSession = async (req, res, next) => {
   try {
     let interviewSession = await InterviewSession.findById(req.params.id);
@@ -158,7 +161,7 @@ exports.updateInterviewSession = async (req, res, next) => {
       data: interviewSession,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.status(500).json({
       success: false,
       message: "Cannot update the interview session",
@@ -166,8 +169,8 @@ exports.updateInterviewSession = async (req, res, next) => {
   }
 };
 
-//@desc     "Delete an appointment"
-//@route    DELETE /api/v1/appointment/:id
+//@desc     Delete an interview session
+//@route    DELETE /api/v1/sessions/:id
 //@access   Private
 exports.deleteInterviewSession = async (req, res, next) => {
   try {
@@ -197,7 +200,6 @@ exports.deleteInterviewSession = async (req, res, next) => {
       data: {},
     });
   } catch (error) {
-    // console.log(error);
     return res.status(500).json({
       success: false,
       message: "Cannot delete the interview session",

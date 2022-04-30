@@ -23,6 +23,9 @@ exports.register = async (req, res, next) => {
   }
 };
 
+//@desc    Login user
+//@route   POST /api/v1/auth/login
+//@access  Public
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -63,6 +66,9 @@ exports.login = async (req, res, next) => {
   }
 };
 
+//@desc    Receive the information of a user
+//@route   GET /api/v1/auth/me
+//@access  Private
 exports.getMe = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -77,7 +83,9 @@ exports.getMe = async (req, res, next) => {
   }
 };
 
-//* Log user out
+//@desc    Log user out / clear cookie
+//@route   GET /api/v1/auth/logout
+//@access  Private
 exports.logout = (req, res, next) => {
   res.cookie("token", "none", {
     expires: new Date(Date.now() + 10 * 1000),

@@ -1,5 +1,8 @@
 const Company = require("../model/Company");
 
+//@desc     Get all companies
+//@route    GET /api/v1/companies
+//@access   Public
 exports.getCompanies = async (req, res, next) => {
   let query;
 
@@ -11,7 +14,6 @@ exports.getCompanies = async (req, res, next) => {
 
   //* Loop over removeFields and delete them from reqQuery
   removeFields.forEach((param) => delete reqQuery[param]);
-  // console.log(reqQuery);
 
   //* Create query string
   let queryStr = JSON.stringify(reqQuery);
@@ -20,8 +22,8 @@ exports.getCompanies = async (req, res, next) => {
     /\b(gte|gt|lte|lt|in)\b/g,
     (match) => `$${match}`
   );
-  // query = Company.find(JSON.parse(queryStr)).populate("interviewSession");
-  query = Company.find(JSON.parse(queryStr));
+
+  query = Company.find(JSON.parse(queryStr)).populate("interviewSessions");
 
   //* Select Fields
   if (req.query.select) {
@@ -49,7 +51,6 @@ exports.getCompanies = async (req, res, next) => {
   try {
     //* Execute query
     const companies = await query;
-    // console.log(req.query);
 
     //* Pagination result
     const pagination = {};
@@ -78,6 +79,9 @@ exports.getCompanies = async (req, res, next) => {
   }
 };
 
+//@desc     Get a company
+//@route    GET /api/v1/companies/:id
+//@access   Public
 exports.getCompany = async (req, res, next) => {
   try {
     const company = await Company.findById(req.params.id);
@@ -97,6 +101,9 @@ exports.getCompany = async (req, res, next) => {
   }
 };
 
+//@desc     Create a company
+//@route    POST /api/v1/companies
+//@access   Private
 exports.createCompany = async (req, res, next) => {
   const company = await Company.create(req.body);
   res.status(201).json({
@@ -105,6 +112,9 @@ exports.createCompany = async (req, res, next) => {
   });
 };
 
+//@desc     Update a company
+//@route    PUT /api/v1/companies/:id
+//@access   Private
 exports.updateCompany = async (req, res, next) => {
   try {
     const company = await Company.findByIdAndUpdate(req.params.id, req.body, {
@@ -128,6 +138,9 @@ exports.updateCompany = async (req, res, next) => {
   }
 };
 
+//@desc     Delete a company
+//@route    DELETE /api/v1/companies/:id
+//@access   Private
 exports.deleteCompany = async (req, res, next) => {
   try {
     const company = await Company.findById(req.params.id);
